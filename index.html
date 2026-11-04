@@ -195,8 +195,8 @@
         </div>
         <div class="hero-fineprint">Android 8.0 (API 26)+ · Bluetooth LE · Mini, Mini S &amp; Micro</div>
         <div class="hero-meta">
-          <span><b>~6&nbsp;MB</b>&nbsp;install size</span>
-          <span><b>v1.0</b>&nbsp;current release</span>
+          <span><b class="apk-size">17&nbsp;MB</b>&nbsp;download</span>
+          <span><b class="apk-ver" data-prefix="v">v2.4</b>&nbsp;current release</span>
           <span><b>Direct APK</b>&nbsp;not on Google Play</span>
         </div>
       </div>
@@ -358,5 +358,35 @@
   setInterval(tick, 1000);
 </script>
 
+<script>
+  // Version and download size come from the latest GitHub release, so publishing a release
+  // (with the APK named exactly RaceBoxInfo.apk) is all it takes to update this page.
+  // If GitHub can't be reached, the values written in the page stay as they are.
+  (function(){
+    function fillFromRelease(rel){
+      // Fills every .apk-ver / .apk-size on the page from the latest release.
+      function releaseVersion(rel){
+        // The version is the number at the end of the release tag (e.g. "App-v2.4" -> "2.4"),
+        // or failing that, the first version number in the release title.
+        var t = (rel.tag_name || "").match(/\d+(?:\.\d+)+/g);
+        if (t) return t[t.length - 1];
+        var n = (rel.name || "").replace(/\s+/g, "").match(/\d+(?:\.\d+)+/);
+        return n ? n[0] : "";
+      }
+      var v = releaseVersion(rel);
+      if (v) document.querySelectorAll(".apk-ver").forEach(function(e){ e.textContent = (e.getAttribute("data-prefix") || "") + v; });
+      var a = (rel.assets || []).filter(function(x){ return x.name === "RaceBoxInfo.apk"; })[0];
+      if (a && a.size) document.querySelectorAll(".apk-size").forEach(function(e){
+        e.textContent = Math.round(a.size / 1000000) + "\u00a0MB";
+      });
+    }
+    if (!window.fetch) return;
+    fetch("https://api.github.com/repos/nsat-dev/rb-gps-droid/releases/latest",
+          { headers: { "Accept": "application/vnd.github+json" } })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(rel){ if (rel) fillFromRelease(rel); })
+      .catch(function(){ /* keep the values written in the page */ });
+  })();
+</script>
 </body>
 </html>
