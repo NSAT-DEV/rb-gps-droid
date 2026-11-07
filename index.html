@@ -157,6 +157,7 @@
   footer .fbrand{ font-family:'Space Mono', monospace; font-size:12.5px; color:var(--steel); }
   footer .fnote{ font-size:12px; color:#5c655e; max-width:44ch; text-align:right; }
   @media (max-width:600px){ footer .wrap{ flex-direction:column; align-items:flex-start; } footer .fnote{ text-align:left; } }
+  [data-rel][hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -195,8 +196,8 @@
         </div>
         <div class="hero-fineprint">Android 8.0 (API 26)+ · Bluetooth LE · Mini, Mini S &amp; Micro</div>
         <div class="hero-meta">
-          <span><b class="apk-size">17&nbsp;MB</b>&nbsp;download</span>
-          <span><b class="apk-ver" data-prefix="v">v2.4</b>&nbsp;current release</span>
+          <span data-rel="size" hidden><b class="apk-size"></b>&nbsp;download</span>
+          <span data-rel="ver" hidden><b class="apk-ver" data-prefix="v"></b>&nbsp;current release</span>
           <span><b>Direct APK</b>&nbsp;not on Google Play</span>
         </div>
       </div>
@@ -361,7 +362,7 @@
 <script>
   // Version and download size come from the latest GitHub release, so publishing a release
   // (with the APK named exactly RaceBoxInfo.apk) is all it takes to update this page.
-  // If GitHub can't be reached, the values written in the page stay as they are.
+  // If GitHub can't be reached, the version and size stay hidden.
   (function(){
     function fillFromRelease(rel){
       // Fills every .apk-ver / .apk-size on the page from the latest release.
@@ -374,18 +375,20 @@
         return n ? n[0] : "";
       }
       var v = releaseVersion(rel);
-      if (v) document.querySelectorAll(".apk-ver").forEach(function(e){ e.textContent = (e.getAttribute("data-prefix") || "") + v; });
+      if (v) { document.querySelectorAll(".apk-ver").forEach(function(e){ e.textContent = (e.getAttribute("data-prefix") || "") + v; });
+        document.querySelectorAll('[data-rel="ver"]').forEach(function(e){ e.hidden = false; }); }
       var a = (rel.assets || []).filter(function(x){ return x.name === "RaceBoxInfo.apk"; })[0];
-      if (a && a.size) document.querySelectorAll(".apk-size").forEach(function(e){
+      if (a && a.size) { document.querySelectorAll(".apk-size").forEach(function(e){
         e.textContent = Math.round(a.size / 1000000) + "\u00a0MB";
       });
+        document.querySelectorAll('[data-rel="size"]').forEach(function(e){ e.hidden = false; }); }
     }
     if (!window.fetch) return;
     fetch("https://api.github.com/repos/nsat-dev/rb-gps-droid/releases/latest",
           { headers: { "Accept": "application/vnd.github+json" } })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(rel){ if (rel) fillFromRelease(rel); })
-      .catch(function(){ /* keep the values written in the page */ });
+      .catch(function(){ /* leave the version and size hidden */ });
   })();
 </script>
 </body>
